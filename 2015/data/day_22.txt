@@ -1,0 +1,4 @@
+<!DOCTYPE html>
+<html lang="en-us"><head><meta charset="utf-8"/><title>Advent of Code</title><link href='//fonts.googleapis.com/css?family=Source+Code+Pro:300&subset=latin,latin-ext' rel='stylesheet' type='text/css'><style>body { background: #0f0f23; color: #cccccc; font-family: "Source Code Pro", monospace; font-size: 14pt; } #message { text-align: center; position: fixed; top: 50%; margin-top: -1.9em; white-space: pre; width: 100%; }</style></head><body><div id="message">.----------------------.
+| We'll be right back! |
+'----------------------'</div></body></html>

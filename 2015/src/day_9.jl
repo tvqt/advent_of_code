@@ -13,21 +13,22 @@ function solve(file_path::String)::Tuple{String, String}
     max_dist = 0
     for i in paths # for each path, calculate the distance
         distance = 0
-        for j in 1:length(i)-1
+        for j in 1:length(i)-1 # loop through all the locations
             for k in input
                 if k[1] == i[j] && k[2] == i[j+1]
-                    distance += parse(Int, k[3])
+                    distance += parse(Int, k[3]) # add the distance
                 end
             end
         end
-    if distance < min_dist # update min and max distance
-        min_dist = distance
-    end
-    if distance > max_dist
-        max_dist = distance
+        if distance < min_dist # if the distance is less than the minimum distance
+            min_dist = distance
+        end
+        if distance > max_dist  # if the distance is greater than the maximum distance
+            max_dist = distance
+        end
     end
 return "Part 1: " * string(min_dist), "Part 2: " * string(max_dist) # return the answer
 end
 
 
-
+@show solve(file_path)

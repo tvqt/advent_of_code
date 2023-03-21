@@ -1,4 +1,6 @@
+# Day 22: Wizard Simulator 20XX
 # https://adventofcode.com/2015/day/22
+
 using Combinatorics
 
 my_stats = Dict("hp" => 50, "mana" => 500, "Shield" => 0, "mana_spent" => 0)

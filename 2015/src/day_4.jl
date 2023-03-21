@@ -1,8 +1,8 @@
 # https://adventofcode.com/2015/day/4
 # Day 4: The Ideal Stocking Stuffer
+
 using MD5
 
-input = readline("2015/data/day_4.txt")
 
 function part_1(input)
     # Find the lowest positive integer (no leading zeroes) that, when appended to the input, produces an MD5 hash that starts with five zeroes.
@@ -14,7 +14,6 @@ function part_1(input)
         end
     end
 end
-@info part_1(input)
 
 function part_2(input)
     # Find the lowest positive integer (no leading zeroes) that, when appended to the input, produces an MD5 hash that starts with six zeroes.
@@ -26,4 +25,8 @@ function part_2(input)
         end
     end
 end
-@info part_2(input)
+
+input = readline("2015/data/day_4.txt")
+
+@show part_1(input)
+@show part_2(input)

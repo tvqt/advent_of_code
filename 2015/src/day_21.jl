@@ -1,3 +1,4 @@
+# Day 21: RPG Simulator 20XX
 # https://adventofcode.com/2015/day/21
 
 boss_file_path = "2015/data/day_21.txt"

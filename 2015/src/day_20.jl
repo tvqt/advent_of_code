@@ -1,5 +1,8 @@
+# Day 20: Infinite Elves and Infinite Houses
 # https://adventofcode.com/2015/day/20
+
 using Primes
+
 input = 36000000 # input
 
 function factors(n::Int, part::Int=1)::Int # function to calculate the factors of a number

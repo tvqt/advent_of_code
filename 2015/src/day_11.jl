@@ -1,4 +1,5 @@
-input = "hepxxyzz"
+input1 = "hepxcrrq"
+input2 = "hepxxyzz"
 
 
 function solver(input::String)::String
@@ -8,4 +9,5 @@ function solver(input::String)::String
         return join(input[1:4] * (input[4]) * (input[4] + 1) * (input[4] + 2) * (input[4] + 2))
     end
 end
-@show solver(input)
+@show solver(input1)
+@show solver(input2)

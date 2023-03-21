@@ -84,7 +84,6 @@ function part_2(input) # check if there is a pair of letters that repeats, and i
         group_val = check_repeating_letters(input[i], 2) || patterns(input[i])
         if repeating_between_letter(input[i]) && group_val && !check_repeating_letters(input[i], 3)
             count2 += 1
-            println(input[i])
         end
     end
     return count2 # return the number of strings that meet the conditions

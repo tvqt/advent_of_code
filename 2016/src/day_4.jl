@@ -1,5 +1,8 @@
+# Day 4: Security Through Obscurity
 # https://adventofcode.com/2016/day/4
+
 using StatsBase
+
 file_path = "2016/data/day_4.txt"
 
 function clean_input(file_path::String)::Vector{Vector{String}}
@@ -51,7 +54,7 @@ function part_2(file_path)
             
         end
         if new_name == "northpole object storage"
-            return line[2]
+            return parse(Int, line[2])
         end
     end
 end

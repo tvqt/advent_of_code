@@ -1,3 +1,4 @@
+# Day 7: Internet Protocol Version 7
 # https://adventofcode.com/2016/day/7
 
 input = readlines("2016/data/day_7.txt")
@@ -45,22 +46,3 @@ end
 
 @show sum([line_checker(line) for line in input])
 @show sum([line_checker(line,2) for line in input])
-
-
-function part_2(input)
-    nothing
-end
-@info part_2(input)
-
-A = [1,2,3,4,5]
-function arraydiff(a, b)
-    return [x for x in a if x ∉ b]
-end
-
-
-validbraces(braces) = replace(braces, r"\(\s*[^(\s]*\s*\)|\[\s*[^[\s]*\s*\[]" => "" )
-
-@show validbraces("(){}[]")
-@show validbraces("([{}])")
-@show validbraces("(}")
-@show validbraces("()))")

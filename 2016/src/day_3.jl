@@ -1,3 +1,4 @@
+# Day 3: Squares With Three Sides
 # https://adventofcode.com/2016/day/3
 
 file_path = "2016/data/day_3.txt"
@@ -24,7 +25,6 @@ function part_1(file_path::String)::Int
     end
     return count
 end
-@show part_1(file_path)
 
 function part_2(file_path)
     input = clean_input(file_path, 2)
@@ -39,4 +39,7 @@ function part_2(file_path)
     end
     return count
 end
+
+@show part_1(file_path)
+
 @show part_2(file_path)

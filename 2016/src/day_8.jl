@@ -1,3 +1,4 @@
+# Day 
 # https://adventofcode.com/2016/day/8
 
 file_path = "2016/data/day_8.txt"
@@ -20,9 +21,10 @@ function clean_input(file_path)
     end
     return out
 end
-@show input = clean_input(file_path)
 
-function part_1(input, nrow, ncol)
+input = clean_input(file_path)
+
+function solve(input, nrow, ncol)
     screen = zeros(Bool, nrow, ncol)
     function rect(screen, x, y)
         for y_i in 1:y
@@ -32,7 +34,6 @@ function part_1(input, nrow, ncol)
         end
         return screen
     end
-
 
     function rotate_col(screen, rotated_row, rotated_amount)
         row = screen[rotated_row+1, :]
@@ -47,6 +48,7 @@ function part_1(input, nrow, ncol)
         screen[:, rotated_col+1] = col
         return screen
     end
+    
     for (command, args...) in input
         if command == "rect"
             screen = rect(screen, args[1], args[2])
@@ -58,12 +60,21 @@ function part_1(input, nrow, ncol)
             end
         end
     end
-    display(transpose(screen))
-    return sum(screen)
+    
+    return sum(screen), transpose(screen)
 end
-@info part_1(input, 50, 6)
 
-function part_2(input)
-    nothing
+emoji_replace(x) = x ? "⬛️" : "⬜️"
+
+function print_screen(screen)
+    for row in 1:size(screen, 1)
+        for col in 1:size(screen, 2)
+            print(emoji_replace(screen[row, col]))
+        end
+        println()
+    end
 end
-@info part_2(input)
+
+p1, p2 = solve(input, 50, 6)
+@show p1
+print_screen(p2)

@@ -1,9 +1,12 @@
+# Day 5: How About a Nice Game of Chess?
 # https://adventofcode.com/2016/day/5
+
 using MD5
+
 file_path = "2016/data/day_5.txt"
 input = read(file_path, String)
-@show input
-function part_1(input)
+
+function part_1(input::String)::String
     n = 0
     password = ""
     while true
@@ -16,9 +19,8 @@ function part_1(input)
         end
     end
 end
-#@info part_1(input)
 
-function part_2(input)
+function part_2(input::String)::String
     n = 0
     password = "XXXXXXXX"
     while true
@@ -35,4 +37,6 @@ function part_2(input)
         end
     end
 end
-@info part_2(input)
+
+@show part_1(input)
+@show part_2(input)

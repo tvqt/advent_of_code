@@ -1,3 +1,4 @@
+# Day 10: Balance Bots
 # https://adventofcode.com/2016/day/10
 
 file_path = "2016/data/day_10.txt"
@@ -29,7 +30,8 @@ function clean_input(file_path=file_path)
     return bots, instructions
 end
 bots, instructions = clean_input()
-function part_1(bots=bots, instructions=instructions)
+
+function solve(bots=bots, instructions=instructions)
     outputs = Dict()
     outs = ["0", "1", "2"]
     p1, p2 = nothing, nothing
@@ -61,5 +63,6 @@ function part_1(bots=bots, instructions=instructions)
         end
     end
 end
-@info part_1()
+
+@show solve()
 

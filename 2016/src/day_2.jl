@@ -1,6 +1,8 @@
-# https://adventofcode.com/2016/day/2
 # Day 2: Bathroom Security
+# https://adventofcode.com/2016/day/2
+
 using DelimitedFiles
+
 file_path = "2016/data/day_2.txt"
 input = readdlm(file_path, String)
 
@@ -23,7 +25,6 @@ function part_1(input) # solves part 1
     end
     return bathroom_code # return the code
 end
-@show part_1(input)
 
 function part_2(input) # solves part 2
     current_position = 5 # start at 5
@@ -74,4 +75,6 @@ function part_2(input) # solves part 2
     end
     return bathroom_code # return the code
 end
+
+@show part_1(input)
 @show part_2(input)

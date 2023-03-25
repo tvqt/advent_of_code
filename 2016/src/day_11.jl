@@ -1,6 +1,8 @@
+# Day 11: Radioisotope Thermoelectric Generators
 # https://adventofcode.com/2016/day/11
 using AStarSearch
 using Combinatorics
+
 file_path = "2016/data/day_11.txt"
 
 function clean_input(file_path=file_path)

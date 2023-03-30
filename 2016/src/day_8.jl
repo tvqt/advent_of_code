@@ -1,4 +1,4 @@
-# Day 
+# Day 8: Two-Factor Authentication
 # https://adventofcode.com/2016/day/8
 
 file_path = "2016/data/day_8.txt"

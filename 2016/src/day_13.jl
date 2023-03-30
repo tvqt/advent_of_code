@@ -29,6 +29,14 @@ function part_2(input)
     unexhausted_areas = Set([(start, steps)])
     exhausted_areas = Set()
     while length(unexhausted_areas) > 0
+        puts "current_location: #{current_location}"
+        puts "steps: #{steps}"
+        puts "unexhausted_areas: #{unexhausted_areas}"
+        puts "exhausted_areas: #{exhausted_areas}"
+        puts "steps: #{steps}"
+        puts "steps_taken: #{steps_taken}"
+        puts "current_location: #{current_location}"
+        puts "steps_taken: #{steps_taken}"
         current_location, steps = pop!(unexhausted_areas)
         push!(exhausted_areas, current_location)
         if steps == 51

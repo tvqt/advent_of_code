@@ -15,20 +15,17 @@ function clean_input(file_path::String)::Vector{Vector{String}}
     return result
 end
 
-function part_1(file_path, part::Int = 1)
+function part_1(file_path, part::Int = 1) 
     sum = 0
     good_ones = []
     input = clean_input(file_path)
     for line in input
-        # remove the dashes
         if line[3] == join([x[1] for x in sort(sort(collect(countmap(replace(line[1], "-"=>"")))), by= x->x[2], rev = true)[1:5]])
             if part == 1
                 sum += parse(Int, line[2])
             else
                 push!(good_ones, line)
             end
-            
-
         end
     end
     if part == 1

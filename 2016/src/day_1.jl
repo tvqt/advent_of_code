@@ -13,6 +13,15 @@ function new_direction(my_dir::Int, turn::Char) # returns a new direction
     return (360+ my_dir) % 360
 end
 
+function new_direction(my_dir::Int, turn::Char) # returns a new direction
+    if turn == 'R'
+        my_dir += 90
+    elseif turn == 'L'
+        my_dir -= 90
+    end
+    return (360+ my_dir) % 360
+end
+
 function move(my_pos::CartesianIndex, my_dir::Int, steps::Int) # returns a new position
     if my_dir == 0
         return my_pos += CartesianIndex(0, steps)
@@ -42,6 +51,7 @@ function history_checker(history, prev_position, position) # checks if a positio
     end
     return nothing, history
 end
+
 function solve(input=input) # solves both parts
     position = CartesianIndex(0,0)
     my_direction = 0

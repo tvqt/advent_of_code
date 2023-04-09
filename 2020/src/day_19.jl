@@ -1,84 +1,93 @@
+# Day 19: Monster Messages
 # https://adventofcode.com/2020/day/19
+
+
+using IterTools
 
 messages_path = "2020/data/day_19.txt"
 rules_path = "2020/data/day_19_rules.txt"
 
-function clean_input(messages=messages_path, rules=rules_path)
-    out = []
-    rules = Dict{String,Any}()
+function clean_input(messages=messages_path, rules=rules_path) # parse the input messages and rules
+    messages = []
+    rules = Dict{String,Vector{Vector{String}}}()
+    clean_rules = Dict{String,Any}()
     
     for line in readlines(messages_path) # parse the messages
-        push!(out, line)
+        push!(messages, line)
     end
 
     for line in readlines(rules_path) # parse the rules
         line = split(line, ": ")
-        rules[line[1]] = line[2]
+
+        if line[2][1] == '"' # if the rule is a single character, add it to the clean rules
+            clean_rules[line[1]] = [string(line[2][2])]
+        else
+            rules[line[1]] = [split(x) for x in split(replace(line[2], "\"" => ""), " | ")]
+        end
     end
-    return out, rules
+    return messages, rules, clean_rules
 end
 
-out, rules = clean_input()
+messages, rules, clean_rules = clean_input()
 
 
-# replace the numbers in the rules with the rules they point to
-function replace_numbers(rules)
-    # filter to only the rules without numbers
-    out = Dict{String, Vector{String}}(k => [replace(v, r"\"" => "")] for (k, v) in rules if !occursin(r"\d", v))
-    while length(out) < length(rules)
-        for (k, v) in rules
-            
-            for key in intersect(split(v), keys(out))
-                rules[k] = [join(replace(split(v), key => subtype), " ") for subtype in out[key]]
+function unnest_rules(messages=messages, rules=rules, clean_rules=clean_rules)
+    uncleaned_rules = copy(rules)
 
-            end
+    while length(uncleaned_rules) > 0
+        ready = filter(kv -> all(x -> x in keys(clean_rules), vcat(kv[2]...)), uncleaned_rules) # find rules that are ready to be cleaned
+        for (k, v) in ready
+            clean_rules[k] = vcat([new_value(x, clean_rules) for x in v]...) # clean the rules
+            delete!(uncleaned_rules, k) # remove the rule from the uncleaned rules
         end
-        for (k, v) in rules
-            if !occursin(r"\d", v)
-                out[k] = split(v, " | ")
-            end
-        end
-
     end
-    return out
+    return clean_rules["0"] # return the values that match rule 0
 end
-@show rules = replace_numbers(rules)
-# replace the items in 101 with the corresponding rule in out
 
-rules["101"] = replace(rules["101"], r"\d+" => s -> rules[s])
 
-# check if a message is valid
-function check_message(message, rule_string)
-    i = 1
-    if !occursin('(', rule_string)
-        if !evaluate(message[i], rule_string)
+
+
+
+new_value(v::Vector{String}, clean_rules) = vec([join(vcat(x...)) for x in IterTools.product([clean_rules[x] for x in v]...)])
+
+
+
+rule_0s = unnest_rules()
+
+function message_checker2(message, clean_rules=clean_rules)
+    # chop message into chunks of length 8
+    rule_length = length(clean_rules["42"][1])
+    input = [message[i:i+rule_length-1] for i in 1:rule_length:length(message)]
+    # for each chunk check if it matches the rule 42
+    matching42, matching31 = [x in clean_rules["42"] for x in input], [x in clean_rules["31"] for x in input]
+    
+    if !matching31[end]
+        return false
+    elseif !(sum(matching42) > sum(matching31))
+        return false
+    end
+    
+    while length(input) > 0
+        if matching42[1] && matching31[end]
+            pop_both_ends!(matching42), pop_both_ends!(matching31), pop_both_ends!(input)
+        elseif matching42[1]
+            popfirst!(matching42), popfirst!(input), pop!(matching31)
+        else
             return false
         end
-    end
-    nesting_level = 0
-    nested_rule = ""
-    while true
-        if rule_string[i] == '(' 
-            nesting_level += 1
-            if nesting_level == 1
-                i += 1
-                continue
-            end
-        elseif rule_string[i] == ')'
-            nesting_level -= 1
-        end
-        if nesting_level == 0
-            if !evaluate(message[i], nested_rule)
-                return false
-            end
-            nested_rule = ""
-        else
-            nested_rule *= rule_string[i]
-        end
-
-        i += 1
     end
     return true
 end
 
-@show check_message("ababbb", rules["0"])
+function pop_both_ends!(x)
+    popfirst!(x)
+    pop!(x)
+end
+
+
+part_1() = filter(x -> x in rule_0s, messages)
+part_2(messages=messages, clean_rules=clean_rules, p1=p1) = length(filter(x -> message_checker2(x, clean_rules), filter(x -> x ∉ p1, messages))) + length(p1)
+
+
+p1 = part_1()
+@show length(p1), part_2()

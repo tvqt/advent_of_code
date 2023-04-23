@@ -29,18 +29,20 @@ function dance(input=clean_input()::Vector{Any}, programs = collect('a':'p'))::V
     return programs
 end
 
-@show join(dance())
-
-function repeated_dance(dances=1000000000,input=clean_input()::Vector{Any},programs = collect('a':'p'))::String
+function repeated_dance(rounds=1000000000,input=clean_input()::Vector{Any},programs = collect('a':'p'))::String
     found_positions = []
-    for d in 1:dances
+    for r in 1:rounds
         programs = dance(input, programs)
-        if input in values(found_positions)
-            println("Found a repeat at dance $d")
+        if programs in found_positions
+            phase = findfirst(x->x == programs, found_positions):r-1
+            start = 1 - phase[1]
+            last_position = ((rounds) % length(phase)) + start
+            return join(found_positions[last_position])
         else
-            push!(found_positions, programs)
+            push!(found_positions, copy(programs))
         end
     end
-    return programs
 end
-@show repeated_dance()
+@show p1 = join(dance())
+
+@show p2 = repeated_dance()

@@ -32,7 +32,7 @@ function neighbours(state, history, min_i, max_i, min_j, max_j, grid)
 end
 
 function surrounding_tiles(coords, min_i, max_i, min_j, max_j, grid)
-    n = [coords + x for x in [CartesianIndex(-1, 0), CartesianIndex(1, 0), CartesianIndex(0, -1), CartesianIndex(0, 1), CartesianIndex(0, 0)]]
+    n = [coords + x for x in [CartesianIndex(-1, 0), CartesianIndex(1, 0), CartesianIndex(0, -1), CartesianIndex(0, 1)]]
     return filter(x -> x[1] >= min_i && x[1] <= max_i && x[2] >= min_j && x[2] <= max_j && grid[x[1], x[2]] == false, n)
 end
 
@@ -69,7 +69,8 @@ function solve(input=clean_input(), start=CartesianIndex(1,2), goal=CartesianInd
     steps = 1
     while !isempty(queue)
         state, steps = pop!(queue)
-        println("$(state[1])")
+        println("$(length(queue))")
+        display(debug(grid, state))
         if state[1] == goal
             return steps
         end
@@ -81,4 +82,16 @@ function solve(input=clean_input(), start=CartesianIndex(1,2), goal=CartesianInd
     end
 
 end
+
+
+function debug(grid, state)
+    location, blizzards = state
+    out = Matrix{String}(undef, size(grid)...)
+    for (coords, char) in blizzards
+        out[coords] = char
+    end
+    out[location] = 'X'
+    return out
+end
+
 @show solve()

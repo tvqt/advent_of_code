@@ -51,17 +51,13 @@ end
 function step(grid::BitMatrix)::BitMatrix
     if size(grid)[1] % 2 == 0
         new_grid = zeros(Bool,  3(size(grid)[1] ÷ 2), 3(size(grid)[1] ÷ 2))
-        old_interval, new_interval = 1:2:size(grid)[1], 1:3:size(new_grid)[1]
-        for (ind, i) in enumerate(new_interval), j in new_interval
-            old = old_interval[ind]
-            new_grid[i:i+2, j:i+2] = rules[grid[old:old+1, old:old+1]]
+        for (ind, i) in enumerate(1:2:size(grid)[1]), (j, m) in enumerate(1:2:size(grid)[2])
+            new_grid[ind] = rules[grid[i:i+1, j:j+1]]
         end
     else
         new_grid = zeros(Bool, 4(size(grid)[1] ÷ 3), 4(size(grid)[2] ÷ 3))
-        old_interval, new_interval = 1:3:size(grid)[1], 1:3:size(new_grid)[1]
-        for (i, n) in enumerate(old_interval)
-            new = new_interval[i]
-            new_grid[n:n+3,n:n+3 ] = rules[grid[n:n+2, n:n+2]]
+        for (i, n) in enumerate(1:3:size(grid)[1]), (m, j) in enumerate(1:3:size(grid)[2])
+            new_grid[i, j] = rules[grid[i:i+2, j:j+2]]
         end
     end
     return new_grid

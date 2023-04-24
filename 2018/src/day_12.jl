@@ -1,45 +1,44 @@
 
 file_path = "2018/data/day_12.txt"
-state = "#..#.#..##......###...###"
+
+state = "##...#...###.#.#..#...##.###..###....#.#.###.#..#....#..#......##..###.##..#.##..##..#..#.##.####.##"
+state = split(state, "") .== "#"
 
 function clean_input(file_path=file_path)
-    out = Dict()
+    out = Dict{BitVector, Bool}()
     for line in readlines(file_path)
         line = split(line, " => ")
-        out[line[1]] = line[2]
+        out[split(line[1], "") .== "#"] = line[2] .== "#"
     end
     return out
 end
 
-function update_state(state, base)
-    if state[1:3] != "..."
-        state = "..."*state
-        base -= 3
-    end
-    if state[end-2:end] != "..."
-        state = state*"..."
-    end
-    return state, base
-end
-
-
-function step_(state, rules, base=0)
-    out = ""
+function pot_step(state::BitVector, rules::Dict{BitVector, Bool})::BitVector
+    state = vcat([0, 0, 0], state, [0, 0, 0])
+    out = copy(state)
     for i in 3:length(state)-2
-        out*=state[i-2:i+2] in keys(rules) ? rules[state[i-2:i+2]] : "."
+        if state[i-2:i+2] ∈ keys(rules)
+            out[i] = rules[state[i-2:i+2]]
+        else
+            out[i] = 0
+        end
     end
-    base += 2
-    return update_state(out, base)
-end
+    return out[3:end-2]
+end 
 
-function solve(state, rules, n=20)
-    base = 0
-    state, base = update_state(state, base)
-    for i in 1:n
-        state, base = step_(state, rules, base)
-        println(state, base)
+function solve(n=20, state=state, rules=clean_input(), old=nothing)
+    for k in 1:n
+        state = pot_step(state, rules)
+        val = [(i-1-k) for (i, p) in enumerate(state) if p]
+        if old !== nothing
+            if length(val) == length(old) && all((val-old) .== 1)  && val[1] >= 3
+                return sum(val) + (n-k)*length(val)
+            end
+        end
+        old = val
+
     end
-    return state, base
+    # state starts at state[1] = pot 0, but each time we run pot step, we add 1 extra pot onto the left edge of the line, so after n steps, we have n extra pots on the left edge, so we need to subtract n from the index of each pot that is true, and then sum them up
+    return sum((i-1-n) for (i, p) in enumerate(state) if p)
 end
-test = solve(state, clean_input())
-[i for (i, x) in enumerate(test) if x == '#'] .+ 0
+@show solve(20), solve(50000000000)

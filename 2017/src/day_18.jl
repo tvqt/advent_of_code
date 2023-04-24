@@ -22,33 +22,47 @@ end
 
 function solve(input)
     n = 1
-    r = Dict('a' => 0, 'b' => 0, 'f' => 0, 'i' => 0, 'p' => 0)
+    r = Dict("a" => 0, "b"=> 0, "f"=> 0, "i"=> 0, "p"=> 0)
     last_sound = 0
     while true
         println("$r, $n, $last_sound, $(input[n])")
         if input[n][1] == "snd"
             last_sound = r[input[n][2]]
         elseif input[n][1] == "set"
-            r[input[n][2]] = input[n][3]
+            if typeof(input[n][3]) == Int
+                r[input[n][2]] = input[n][3]
+            else
+                r[input[n][2]] = r[input[n][3]]
+            end
         elseif input[n][1] == "add"
             r[input[n][2]] += input[n][3]
         elseif input[n][1] == "mul"
             r[input[n][2]] *= input[n][3]
         elseif input[n][1] == "mod"
-            r[input[n][2]] %= input[n][3]
+            if typeof(input[n][3]) == Int
+                r[input[n][2]] %= input[n][3]
+            else
+                r[input[n][2]] %= r[input[n][3]]
+            end
         elseif input[n][1] == "rcv"
             if r[input[n][2]] != 0
                 return last_sound
             end
         elseif input[n][1] == "jgz"
             if r[input[n][2]] > 0
-                n += input[n][3]
+                if typeof(input[n][3]) == Int
+                    n += input[n][3]
+                else
+                    n += r[input[n][3]]
+                end
                 continue
             end
         else
             error("Unknown instruction")
         end
-        n += 1
+        if input[n][1] != "jgz" || r[input[n][2]] == 0
+            n += 1
+        end
     end
 end
 @show solve(input)

@@ -243,6 +243,44 @@ function day_12(program )
    println(part_2(program))
 end
 
-function day_15(program)
+function day_15(program, input = [], i=1, relative_base=0, start=CartesianIndex(0, 0))
+    seen = Dict(start => 0)
+    frontier = Dict((program, i, relative_base, start) => 0)
+    dirs = [1 => CartesianIndex(-1, 0), 2 => CartesianIndex(1, 0), 3 => CartesianIndex(0, -1), 4 => CartesianIndex(0, 1)]
+    goal = nothing
+    while !isempty(frontier)
+        (program, i, relative_base, location), cost = pop!(frontier)
+        for direction in dirs
+            if location + direction[2] ∉ keys(seen) || cost +1 < seen[location + direction[2]]
+                state = Intcode(copy(program), [direction[1]], true, i, relative_base)
+                if state === nothing
+                    continue
+                else
+                    new_program, new_i, new_relative_base, history = state
+                end 
+                if history == [0]
+                    continue
+                end
+                seen[location + direction[2]] = cost + 1
+                if history == [2]
+                    goal = location + direction[2]
+                end
+                frontier[(new_program, new_i, new_relative_base, location + direction[2])] = cost + 1 
+            end
+        end
+    end
+    function neighbours(location)
+        ns = [location + c[2] for c in values(dirs)]
+        return [n for n in ns if n in keys(seen)]
+    end
+    println("Part 1: $(astar(neighbours, start, goal).cost)")
+    oxygenated = Set([goal])
+    minute = 0
+    while oxygenated != keys(seen)
+        minute += 1
+        oxygenated = union(oxygenated, Set([k for k in keys(seen) if any(n in oxygenated for n in neighbours(k))]))
+    end
+    println("Part 2: $minute") 
 end
 
+day_15(input)

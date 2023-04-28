@@ -2,29 +2,31 @@
 
 input = 124075:580770
 
-function part_1(input)
-    out = []
-    for i in input
-        i = string(i)
-        if occursin(r"(\d)\1", i) && (i == join(sort(split(i, ""))))
-            push!(out, i)
+function solve(input)
+    p1 = 0
+    p2 = 0
+    for n in input
+        n = string(n)
+        f = findall(r"(\d)\1", n)
+        if !isempty(f) && (n == join(sort(split(n, ""))))
+            p1 += 1
+
+            # found in the Reddit answer thread
+            if occursin(r"(\d)(?<!(?=\1)..)\1(?!\1)", i)
+                p2 += 1
+            end
+           # original solution, by me
+            """for c in f
+                # original solution, by me
+                b = c[1] == 1 ? true : n[c[1]] != n[c[1]-1]
+                e = c[2] == length(n) ? true : n[c[1]] != n[c[2]+1]
+                if b && e
+                    p2 += 1
+                    break
+                end
+            end"""
         end
     end
-    return length(out)
+    return p1, p2
 end
-@info part_1(input)
-
-function rule_2(s)
-    # Corner cases
-    s[1] == s[2] != s[3] && return true
-    s[end-2] != s[end-1] == s[end] && return true
-    # Check rest of the string
-    for i = 2:length(s)-2
-        s[i-1] != s[i] == s[i+1] != s[i+2] && return true
-    end
-    return false
-end
-not_decreasing(s) = join(sort(collect(s))) == s
-meets_criteria_2(s) = not_decreasing(s) && rule_2(s)
-result_2 = count(x -> meets_criteria_2(string(x)), input)
-@info result_2
+@info solve(input)

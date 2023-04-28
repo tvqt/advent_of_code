@@ -6,32 +6,31 @@ input = [parse.(Int, split(line, ",")) for line in readlines(file_path)]
 
 manhattan_distance(p1, p2) = sum(abs.(p1 .- p2))
 
-in_constellation(point, constellation) = any((manhattan_distance(point, p) <= 3) for p in constellation)
 
 constellations = []
-function part_1(input)
-    for point in input
-        if point ∉ vcat(constellations...)
-            push!(constellations, [point])
-            while true
-            end
+function one_constellation(input)
+    constellation = Set([popfirst!(input)])
+    while true
+        connected = [x for x in input if any(manhattan_distance(x, y) <= 3 for y in constellation)]
+        if isempty(connected)
+            return constellation, input
         end
+        push!(constellation, connected...)
+        input = setdiff(input, connected)
     end
-                
-            
-    
-    
-    length(constellations)
 end
 
-function rotate_clockwise(input)
-    out = []
-    for scanner in input
-        push!(out, (scanner[2], -scanner[1], scanner[3]))
-    end
-    return out
-end
 
-test = [(3,4,5)]
+function part_1(input)
+    constellations = 0
+    while !isempty(input)
+        _, input = one_constellation(input)
+        constellations += 1
+    end
+    return constellations
+end
+@show part_1(input)
+
+
 
 

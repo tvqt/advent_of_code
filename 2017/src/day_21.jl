@@ -50,15 +50,20 @@ end
 
 function step(grid::BitMatrix)::BitMatrix
     if size(grid)[1] % 2 == 0
-        new_grid = zeros(Bool,  3(size(grid)[1] ÷ 2), 3(size(grid)[1] ÷ 2))
-        for (ind, i) in enumerate(1:2:size(grid)[1]), (j, m) in enumerate(1:2:size(grid)[2])
-            new_grid[ind] = rules[grid[i:i+1, j:j+1]]
+        new_grid = zeros(Bool, size(grid)[1] * 3 ÷ 2, size(grid)[2] * 3 ÷ 2)
+        for i in 1:2:size(grid)[1]
+            for j in 1:2:size(grid)[2]
+                new_grid[i*3÷2:i*3÷2+2, j*3÷2:j*3÷2+2] = rules[grid[i:i+1, j:j+1]]
+            end
         end
-    else
-        new_grid = zeros(Bool, 4(size(grid)[1] ÷ 3), 4(size(grid)[2] ÷ 3))
-        for (i, n) in enumerate(1:3:size(grid)[1]), (m, j) in enumerate(1:3:size(grid)[2])
-            new_grid[i, j] = rules[grid[i:i+2, j:j+2]]
+    elseif size(grid)[1] % 3 == 0
+        new_grid = zeros(Bool, size(grid)[1] * 4 ÷ 3, size(grid)[2] * 4 ÷ 3)
+        for i in 1:3:size(grid)[1]
+            for j in 1:3:size(grid)[2]
+                new_grid[i*4÷3:i*4÷3+3, j*4÷3:j*4÷3+3] = rules[grid[i:i+2, j:j+2]]
+            end
         end
+        
     end
     return new_grid
 end

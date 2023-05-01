@@ -1,87 +1,150 @@
 # https://adventofcode.com/2016/day/25
 
+# Shoutout to Reddit, and u/thomastc for a hand with this one. The first chunk was fine for me, but the second chunk wasn't returning the right answer, for reasons that were (and are) entirely mysterious to me
 file_path = "2016/data/day_25.txt"
 
-inc(x) = x+1
-dec(x) = x-1
-jnz(x, y, i) = x ≠ 0 ? i + y : i + 1
-cpy(x, r) = get_value(x, r)
-out(x) = x
-get_value(value, registry) = typeof(value) == Int ? value : registry[value]
 
-
-function clean_input(f=file_path)
-    out::Vector{Any} = []
-    for line in split.(readlines(f))
-        l::Vector{Any} = [getfield(Main, Symbol(line[1]))]
-        push!(l, (try( parse(Int, line[2]) ); catch; line[2]; end))
-        if length(line) == 3
-            push!(l, (try( parse(Int, line[3]) ); catch; line[3]; end))
+# Original solution, before seeing Reddit
+function clean_input(f=file_path)::Array{Array{Any,1},1}
+    input = split.(readlines(f))
+    out = []
+    for line in input
+        if length(line) == 2
+            push!(out, line)
+        elseif length(line) == 3
+            vars = []
+            for var in line[2:end]
+                if occursin(r"\d+", var)
+                    push!(vars, parse(Int, var))
+                else
+                    push!(vars, var)
+                end
+            end
+            push!(out, [line[1], vars...])
         end
-        push!(out, l)
     end
     return out
 end
 
-function run_program(value, input=clean_input())
-    history = []
-    i = 1
-    value = 0
+#@show input = clean_input()
+
+# edited, after seeing Reddit
+function run_code(n, input=input, requiredlen=10)
+    old = nothing
     len = 0
-    registry = Dict("a" => 7, "b" => 0, "c" => 0, "d" => 0)
-    registry["a"] = value
+    registry = Dict("a" => n, "b" => 0, "c" => 0, "d" => 0)
+    i = 1
     while i <= length(input)
-        if input[i][1] == out
-            println("here")
-            if get_value(input[i][2], registry) != value
-                return false
+        if i+7 <= length(input) && input[i:i+1] == [Any["cpy", "a", "d"], 
+                                                    Any["cpy", 9, "c"], 
+                                                    Any["cpy", 282, "b"], 
+                                                    Any["inc", "d"],
+                                                    Any["dec", "b"],
+                                                    Any["jnz", "b", -2],
+                                                    Any["dec", "c"],
+                                                    Any["jnz", "c", -5]]
+            #println("jump one")
+            registry["d"] = registry["a"] +  282registry["c"]
+            registry["b"] = 0
+            registry["c"] = 0
+            i += 8
+            continue
+        elseif i+9 <= length(input) && input[i:i+3] == [Any["cpy", "a", "b"],
+                                                        Any["cpy", 0, "a"],
+                                                        ["cpy", 2, "c"],
+                                                        ["jnz", "b", 2],
+                                                        ["jnz", 1, 6],
+                                                        ["dec", "b"],
+                                                        ["dec", "c"],
+                                                        ["jnz", "c", -4],
+                                                        ["inc", "a"],
+                                                        ["jnz", 1, -7]]
+            #println("jump two")
+            registry["b"] = registry["d"]
+            registry["a"] = floor(Int, registry["a"] / 2)
+            registry["c"] = 2 - (registry["b"] % 2)
+            i += 10
+            continue
+        end
+        #println(input[i])
+        if input[i][1] == "cpy"
+            if input[i][2] isa Int
+                registry[input[i][3]] = input[i][2]
             else
-                value = 1 - value
-                len += 1
-                if len == 100
-                    return true
+                registry[input[i][3]] = registry[input[i][2]]
+            end
+        elseif input[i][1] == "inc"
+            registry[input[i][2]] += 1
+        elseif input[i][1] == "dec"
+            registry[input[i][2]] -= 1
+        elseif input[i][1] == "jnz"
+            if input[i][2] isa Int
+                if input[i][2] != 0
+                    i += input[i][3]
+                    continue
+                end
+            elseif registry[input[i][2]] != 0
+                i += input[i][3]
+                continue
+            end
+        elseif input[i][1] == "out"
+            println(registry[input[i][2]])
+            if old !== nothing
+                if abs(old - 1)  == registry[input[i][2]]
+                    len += 1
+                else
+                    return false
                 end
             end
-        end
-        if i + 5 <= length(input) && input[i:i+5] == [[cpy, 282, "b"], [inc, "d"], [dec, "b"], [jnz, "b", -2], [dec, "c"], [jnz, "c", -5]]
-            println("jump one")
-            registry["d"] += 282registry["c"] 
-            registry["c"] = 0
-            registry["b"] = 0
-            i += 6
-            continue
-        elseif i + 11 <= length(input) && input[i:i+11] == [[cpy, "d", "a"], [jnz, 0, 0], [cpy, "a", "b"], [cpy, 0, "a"], [cpy, 2, "c"], [jnz, "b", 2], [jnz, 1, 6], [dec, "b"], [dec, "c"], [jnz, "c", -4], [inc, "a"], [jnz, 1, -7]]
-            println("jump two")
-            registry["a"] = registry["d"] ÷ 2
-            registry["b"] = 0
-            registry["c"] = 0
-            i += 12
-        end
-        println(input[i])
-        if input[i][1] == out
-            push!(history, get_value(input[i][2], registry))
-            i += 1
-        elseif length(input[i]) == 2
-            registry[input[i][2]] = input[i][1](registry[input[i][2]]); i += 1
-        elseif input[i][1] == jnz
-            i = input[i][1](get_value(input[i][2], registry), get_value(input[i][3], registry), i)
-        elseif input[i][1] == cpy
-            registry[input[i][3]] = input[i][1](input[i][2], registry); i += 1
-        end
-        if length(history) > 5 && (history[end-4:end] == [0, 1, 0, 1, 0] || history[end-4:end] == [1, 0, 1, 0, 1])
-            return true
-        end
-    end
-end
-@show run_program(7)
+            old = registry[input[i][2]]
+            if len == requiredlen
+                return true
+            end
 
-function part_1()
-    value = 1
-    while true
-        if run_program(value)
-            return value
         end
-        value += 1
+        i += 1
     end
 end
-@show part_1()
+
+# simplified version of the program, from Reddit
+function simplified(a, n)
+    d = a + n
+    val = 0
+    len = 0
+    if a == 192
+        println("d = $d")
+    end
+    while true 
+        a = d
+        while a != 0 
+            b = a % 2
+            a = floor(a/2)
+            if b == val
+                len += 1
+            else
+                return false
+            end
+            val = 1 - val
+            if len == 10
+                return true
+            end
+        end
+    end
+end
+    
+
+
+new_in(f=file_path) = parse(Int, split(readlines(f)[3])[2]) * parse(Int, split(readlines(f)[2])[2])
+@show new_in()
+
+function part_1(n)
+    i = 1
+    while true
+        println(i)
+        if simplified(i, n)
+            return i
+        end
+        i += 1
+    end
+end
+@show part_1(new_in())

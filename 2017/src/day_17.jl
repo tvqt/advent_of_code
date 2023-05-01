@@ -10,13 +10,28 @@ end
 
 function spinlock(step::Int, n::Int)::Vector{Int}
     state = [0]
+    old = 0
+    position = 1
     for i in 1:n
         state = spinlock_step(state, step, i)
     end
     return state
 end
 
+function part_2(step::Int, n::Int)::Int
+    next_to_zero = 1
+    position = 1
+    len= 2
+    for i in 1:n
+        position = mod1(position + step, i) + 1
+        if position == 2
+            next_to_zero = i
+        end
+    end
+    return next_to_zero
+end
+
 @show spinlock(input, 2017)[2]
-p2 =  spinlock(input, 50_000_000)
+p2 =  part_2(input, 50_000_000)
 # get the value after 0
-@show p2[findfirst(p2, 0) + 1]
+@show p2

@@ -10,10 +10,10 @@ function clean_input(f=file_path)
     for line in 4:10:length(input)
         state = input[line][end-1]
         if_zero = input[line+2][end-1] == '1' ? 1 : 0
-        zero_direction = input[line+3][end-3] == 'g' ? 1 : -1
+        zero_direction = split(input[line+3])[end] == "right." ? 1 : -1
         zero_new_state = input[line+4][end-1]
         if_one = input[line+6][end-1] == '1' ? 1 : 0
-        one_direction = input[line+7][end-3] == 'g' ? 1 : -1
+        one_direction = split(input[line+7])[end] == "right." ? 1 : -1
         one_new_state = input[line+8][end-1]
         rules[state] = [[if_zero, zero_direction, zero_new_state], [if_one, one_direction, one_new_state]]
     end
@@ -23,26 +23,20 @@ end
 
 state, steps, rules = clean_input();
 
-function turing_machine(state, steps, rules)
-    tape = [0]
-    position = 1
-    for i in 1:steps
-        tape[position] = rules[state][tape[position]+1][1]
-        old_state = state
-        state = rules[state][tape[position]+1][3]
-        if rules[old_state][tape[position]+1][2] == 1
-            position += 1
-            if position > length(tape)
-                push!(tape, 0)
-            end
-        else
-            position -= 1
-            if position == 0
-                pushfirst!(tape, 0)
-                position = 1
-            end
-        end
+function new(state, tape, position)
+    if position ∉ keys(tape)
+        tape[position] = 0
     end
-    return sum(tape)
+    return rules[state][tape[position]+1]
 end
-@show turing_machine(state, steps, rules)
+
+function part_1(state, steps, rules)
+    tape = Dict()
+    position = 0
+    for i in 1:steps
+        tape[position], direction, state = new(state, tape, position)
+        position += direction
+    end
+    return sum(values(tape))
+end
+@show part_1(state, steps, rules)

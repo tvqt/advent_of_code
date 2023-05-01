@@ -52,7 +52,7 @@ function attack_enemy(friend, enemy, c, elf_attack, elf_coords)
                 enemy_coords = sort(neighbs, by= x ->(x[1], x[2]))[1]
             end
         end
-        if enemy_coords ∈ elf_coords
+        if enemy_coords ∉ elf_coords
             enemy[enemy_coords] -= elf_attack
         else
             enemy[enemy_coords] -= 3
@@ -105,13 +105,11 @@ function move_to_enemy(start::CartesianIndex, friend, enemy)
             end
         end
     end
-    
     if isempty(out)
         return nothing
     end
     # sort the best options by reading order to find our goal
     goal = sort(out, by= x ->(x[1], x[2]))[1]
-
     # trace our steps back, to the first step towards the goal
     step = goal
     while true
@@ -143,23 +141,21 @@ function battle(g, e, part1, elf_attack=3)
                 e, g = take_action(c, e, g, elf_attack, keys(e))
             end
         end
-        if length(g) > 0 && length(e) > 0
+        #if length(g) > 0 && length(e) > 0
             #println("Goblin HP is $(sum(values(goblin))), Elf HP is $(sum(values(elf)))")
             #print_grid(grid, goblin, elf)
-        end
+        #end
         if length(e) < elves && !part1
             return false, nothing
         end
-        
-        
 
     end
     winner = isempty(g) ? e : g
-    return part1 ? (rnd-1) * (sum(values(winner))) : isempty(g), (rnd-1) * (sum(values(winner)))
+    return part1 ? (rnd-1) * (sum(values(winner))) : (isempty(g), (rnd-1) * (sum(values(winner))))
 end
 
 function print_grid(grid, g, e)
-    # make a string version of grid
+    # print the grid in the console, to aid debugging
     string_grid = Matrix(undef, size(grid, 1), size(grid, 2))
     for coord in CartesianIndices(grid)
         if grid[coord]
@@ -179,21 +175,15 @@ function print_grid(grid, g, e)
     end
 end
 
-function part2(g, e)
+function part_2(goblin, elf)
     elf_attack = 4
-    step = 1
-    last_result = false
     while true
-        ng, ne = deepcopy(g), deepcopy(e)
-        won, score = battle(ng, ne, false, elf_attack)
-        if won
-            println(score)
-            break
+        elf_attack += 1
+        win, score = battle(deepcopy(goblin), deepcopy(elf), false, elf_attack)
+        if win
+            return score
         end
-        elf_attack += step
-        last_result = won
-            
     end
 end
-
-@show part2(deepcopy(goblin), deepcopy(elf))
+@show battle(deepcopy(goblin), deepcopy(elf), true)
+@show part_2(goblin, elf)

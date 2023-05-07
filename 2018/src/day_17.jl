@@ -8,7 +8,7 @@ function clean_input(file_path=file_path)
     for line in readlines(file_path)
         var1, var1val, var2, var2val1, var2val2 = match(r"(\w+)=(\d+), (\w+)=(\d+)..(\d+)", line).captures
         range = collect(parse(Int, var2val1):parse(Int, var2val2))
-        var1 == "x" ? [out[CartesianIndex(parse(Int, var1val), y)] = false for y in range] : [out[CartesianIndex(x, parse(Int, var1val))] = false for x in range]
+        var1 == "x" ? [out[CartesianIndex(parse(Int, var1val), y)] = '#' for y in range] : [out[CartesianIndex(x, parse(Int, var1val))] = '#' for x in range]
     end
     return out
 end
@@ -59,16 +59,95 @@ end
 
 
 
-
-
-
-
-function solve(i)
-    clay = length(deepcopy(i))
-    upper_bound = maximum(i)[1][2]
-    lower_bound = minimum(i)[1][2]
-    final = waterfall!(deepcopy(i), CartesianIndex(500, 0), upper_bound)
-    water = length(i) - clay - 1
-    return water
+function print_map(grid)
+    min_x, max_x = minimum([x[1] for x in keys(grid)]), maximum([x[1] for x in keys(grid)])
+    min_y, max_y = minimum([x[2] for x in keys(grid)]), maximum([x[2] for x in keys(grid)])
+    for y in min_y:max_y
+        for x in min_x:max_x
+            if CartesianIndex(x, y) ∈ keys(grid)
+                print(grid[CartesianIndex(x, y)])
+            else
+                print('.')
+            end
+        end
+        println()
+    end
 end
-@show solve(clean_input())
+
+
+
+
+
+function waterfall_new(grid, location, start=CartesianIndex(500, 0))
+    if location === nothing
+        location = start
+    end
+    upper_limit = maximum(grid)[1][2]
+    while true
+        #print_map_subsection(location, grid)
+        if location + dirs["R"] + dirs["D"] ∈ keys(grid) && grid[location + dirs["R"] + dirs["D"] ] == '|' && location + dirs["D"] ∉ keys(grid)
+            println("here")
+        elseif location + dirs["L"] + dirs["D"] ∈ keys(grid) && grid[location + dirs["L"] + dirs["D"] ] == '|' && location + dirs["D"] ∉ keys(grid)
+            println("here")
+        end
+        if location[2] == upper_limit 
+            grid[location] = '|'
+            break
+        end
+        if location + dirs["D"] ∉ keys(grid)
+            grid[location + dirs["D"]] = '|'
+            location += dirs["D"]
+        elseif grid[location + dirs["D"]] == '|'
+            break
+        elseif grid[location + dirs["D"]] in ['#', '~']
+            left, left_edge = water_spread_new(grid, location, dirs["L"])
+            right, right_edge = water_spread_new(grid, location, dirs["R"])
+            if left && right
+                for x in left_edge[1]:right_edge[1]
+                    grid[CartesianIndex(x, location[2])] = '~'
+                end
+                location -= dirs["D"]
+            else
+                for x in left_edge[1]:right_edge[1]
+                    grid[CartesianIndex(x, location[2])] = '|'
+                end
+                break
+            end
+        end
+    end
+    return grid
+end
+function print_map_subsection(location, grid)
+    min_x, max_x = location[1] -75, location[1] + 75
+    min_y, max_y = location[2] - 10, location[2] + 10
+    for y in min_y:max_y
+        for x in min_x:max_x
+            if CartesianIndex(x, y) ∈ keys(grid)
+                print(grid[CartesianIndex(x, y)])
+            else
+                print('.')
+            end
+        end
+        println()
+    end
+end
+
+function water_spread_new(grid, location, direction)
+    while true
+        location += direction
+        if location ∈ keys(grid) && grid[location] == '#'
+            return true, location - direction
+        elseif location + dirs["D"] ∉ keys(grid)
+            grid = waterfall_new(grid, location)
+            if grid[location + dirs["D"]] == '|'
+                return false, location
+            end
+        elseif location + dirs["D"] ∈ keys(grid) && grid[location + dirs["D"]] == '|'
+            return false, location
+        end
+    end
+end
+lower_limit = minimum([x[2] for x in keys(clean_input())])
+map = waterfall_new(clean_input(), nothing, CartesianIndex(500, 0))
+println(length([k for (k, v) in map if k[2] >= lower_limit && v in ['~', '|']]))
+println(length([k for (k, v) in map if k[2] >= lower_limit && v == '~']))

@@ -27,7 +27,8 @@ initial_shape_positions =  [[1, 3],
 initial_shape_positions = Dict(zip(shapes, initial_shape_positions))
 
 max_row = Dict(s => maximum([o[1] for o in shape_offsets[s]]) for s in shapes)
-function shape_in_direction(direction, shape_offsets=shape_offsets)
+
+function shape_in_direction(direction, shape_offsets=shape_offsets) # returns a dictionary of shape to offsets in a particular direction
     out = Dict()
     if direction == "above"
         dir = [-1, 0]
@@ -48,7 +49,7 @@ shape_left, shape_right, shape_above, shape_below = shape_in_direction("left"), 
 
 chamber = zeros(Bool, 3, 7)
 
-function highest_rock(chamber)
+function highest_rock(chamber) # returns the index of the highest rock in the chamber
     for i in reverse(axes(chamber, 1))
         if !any(chamber[i, :])
             return i+1
@@ -56,7 +57,7 @@ function highest_rock(chamber)
     end
 end
 
-function add_new_height(chamber, clearance=3)
+function add_new_height(chamber, clearance=3) # adds a new height to the chamber, if the highest rock is within clearance of the top
     highest = highest_rock(chamber)
     if highest < clearance + 1
         return vcat(zeros(Bool, clearance - highest + 1, 7), chamber)
@@ -67,42 +68,30 @@ function add_new_height(chamber, clearance=3)
     end
 end
 
-function add_shape(chamber, shape)
+function add_shape(chamber, shape) # adds a shape to the chamber
     chamber = add_new_height(chamber)
     return vcat(shape_matrices[shape], chamber)
 end
 
 
-function against_wall(shape, shape_position, push_index)
+function against_wall(shape, shape_position, push_index) # returns true if the shape is against the wall
     return input[push_index] == ">" ? (shape_position + shape_offsets[shape][end])[2] == 7 : shape_position[2] == 1 
 end
 
-function remove_old_rock(chamber, shape, shape_position) 
-    [chamber[c...] = false for c in [shape_position + o for o in shape_offsets[shape]]]
-        
-    return chamber
-end
 
-function move_rock_down(chamber, shape, shape_position)
-    remove_old_rock(chamber, shape, shape_position)
-    shape_position = shape_position + [1, 0]
-    [chamber[c...] = true for c in [shape_position + o for o in shape_offsets[shape]]]
-    return shape_position
-end
 
-function push_rock(chamber, shape, shape_position, push_index)
+function push_rock(chamber, shape, shape_position, push_index) # pushes the rock in the direction of the push_index
     right = input[push_index] == ">"
     pushing_into_rock = right ? any([chamber[c...] for c in [shape_position + o for o in shape_right[shape]]]) : any([chamber[c...] for c in [shape_position + o for o in shape_left[shape]]])
     if pushing_into_rock
         return shape_position
     end
-    chamber = remove_old_rock(chamber, shape, shape_position)
     shape_position[2] = right ? shape_position[2] + 1 : shape_position[2] - 1
     [chamber[c...] = true for c in [shape_position + o for o in shape_offsets[shape]]]
     return shape_position
 end
 
-function rock_resting(chamber, shape, shape_position)
+function rock_resting(chamber, shape, shape_position) # returns true if the rock is resting on another rock
     return  any([(shape_position + o)[1] == size(chamber)[1] for o in shape_offsets[shape]]) || any([chamber[c...] for c in [shape_position + o for o in shape_below[shape]]])
 end
 
@@ -149,19 +138,18 @@ function run(num_rocks=2022, chamber=chamber, shapes=shapes, input=input)
         seen = check_sequence(fall, history)
         if seen[1]
             initial_height = history[seen[2]-1][2][1]
-            pattern_height = highest(chamber) - initial_height
+            pattern_height = highest_rock(chamber) - initial_height
             pattern_times = (num_rocks - seen[2][2]) ÷ (rocks_stopped - seen[2][2])
             pattern_remainder = (num_rocks - seen[2][2]) % (rocks_stopped - seen[2][2])
-            total = pattern_height * pattern_times + highest(chamber) - pattern_remainder
+            total = pattern_height * pattern_times + highest_rock(chamber) - pattern_remainder
             break
         else
-            push!(history, fall => (highest(chamber), rocks_stopped))
+            push!(history, fall => (highest_rock(chamber), rocks_stopped))
+        end
     end
     println(sum(chamber))
     return size(chamber)[1] - highest_rock(chamber) + 1
 end
-@show run(2022)
-@show run(1000000000000)
 
 function check_sequence(value, history)
     if value ∉ history
@@ -173,4 +161,19 @@ function check_sequence(value, history)
         end
     end
     return false, nothing
+end
+@show run(2022)
+
+
+function remove_old_rock(chamber, shape, shape_position) # 
+    [chamber[c...] = false for c in [shape_position + o for o in shape_offsets[shape]]]
+        
+    return chamber
+end
+
+function move_rock_down(chamber, shape, shape_position)
+    remove_old_rock(chamber, shape, shape_position)
+    shape_position = shape_position + [1, 0]
+    [chamber[c...] = true for c in [shape_position + o for o in shape_offsets[shape]]]
+    return shape_position
 end

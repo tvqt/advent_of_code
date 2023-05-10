@@ -2,113 +2,43 @@
 using Combinatorics
 file_path = "2019/data/day_12.txt"
 
-function clean_input(file_path=file_path)
-    out = []
-    for line in eachline(file_path)
-        linedict = Dict()
-        # parse lines like
-        # <x=-19, y=-4, z=2>
-        # <x=9, y=8, z=-16>
-        x, y, z = match(r"<x=(?<x>-?\d+), y=(?<y>-?\d+), z=(?<z>-?\d+)>", line).captures
-        linedict["x"], linedict["y"], linedict["z"] = parse(Int, x), parse(Int, y), parse(Int, z)
-        linedict["vx"], linedict["vy"], linedict["vz"] = 0, 0, 0
-        push!(out, linedict)
-    end
-    return out
+function clean_input(file_path=file_path) # read input file and return a list of lists of integers
+    out = [parse.(Int, match(r"<x=(?<x>-?\d+), y=(?<y>-?\d+), z=(?<z>-?\d+)>", line).captures) for line in readlines(file_path)]
+    return [x[1] for x in out], [x[2] for x in out], [x[3] for x in out]
 end
-@show input = clean_input()
 
-function part_1(input=input, steps=1000)
-
-    function gravity_pair(m1, m2, input=input)
-        if input[m1]["x"] < input[m2]["x"]
-            input[m1]["vx"] += 1
-            input[m2]["vx"] -= 1
-        elseif input[m1]["x"] > input[m2]["x"]
-            input[m1]["vx"] -= 1
-            input[m2]["vx"] += 1
-        end
-        if input[m1]["y"] < input[m2]["y"]
-            input[m1]["vy"] += 1
-            input[m2]["vy"] -= 1
-        elseif input[m1]["y"] > input[m2]["y"]
-            input[m1]["vy"] -= 1
-            input[m2]["vy"] += 1
-        end
-        if input[m1]["z"] < input[m2]["z"]
-            input[m1]["vz"] += 1
-            input[m2]["vz"] -= 1
-        elseif input[m1]["z"] > input[m2]["z"]
-            input[m1]["vz"] -= 1
-            input[m2]["vz"] += 1
-        end
-        return input
+function gravity_pair_dir(m, v) # calculate velocity change in one particular coordinate direction (x, y, or z). m is the location, v is the velocity
+    for i in combinations(eachindex(m), 2)
+        v[i[1]], v[i[2]] = gravity_pair_two(m[i[1]], m[i[2]], v[i[1]], v[i[2]])
     end
+    return v
+end
 
-    function add_velocity(input=input)
-        for moon in input
-            moon["x"] += moon["vx"]
-            moon["y"] += moon["vy"]
-            moon["z"] += moon["vz"]
-        end
-        return input
-    end
+gravity_pair_two(m1, m2, v1, v2) = m1 < m2 ? (v1 +1, v2 -1) : m1 > m2 ? (v1 -1, v2 +1) : (v1, v2) # velocity change from one particular interaction
+gravity_pair(m3, v3) = [gravity_pair_dir(m, v) for (m, v) in zip(m3, v3)] # velocity change from all interactions
+add_velocity_dir(m, v) = [m[i] + v[i] for i in eachindex(m)] # add velocity change to location in one particular coordinate direction
+add_velocity(m3, v3) = [add_velocity_dir(m, v) for (m, v) in zip(m3, v3)] # add velocity change to location in all coordinate directions
+energy(input, v) = sum([sum(abs.([x[i] for x in input])) * sum(abs.([x[i] for x in v])) for i in eachindex(input[1])])  # total energy of the system
+repeating_check(input, initial, repeating, step, v) = [repeating[i] = repeating[i] != 0 ? repeating[i] : input[i] == initial[i] ? step + 1 : 0 for i in eachindex(input)] # check if the system has returned to its initial state
 
-    function energy(input=input)
-        total = 0
-        for moon in input
-            pot = abs(moon["x"]) + abs(moon["y"]) + abs(moon["z"])
-            kin = abs(moon["vx"]) + abs(moon["vy"]) + abs(moon["vz"])
-            total += pot * kin
-        end
-        return total
-    end
-
+function solve(input = clean_input(), steps=1000) # solve part 1 and 2
+    v = [[0 for _ in eachindex(input[1])] for _ in 1:3]
     total_energy = 0
     step = 0
     initial_state = deepcopy(input)
-    repeating_periods = [[0, 0, 0] for i in 1:length(input)]
-
-    function repeating_check(input=input, initial_state=initial_state, repeating_periods=repeating_periods)
-        for (i, moon) in enumerate(input)
-            if any(x -> x == 0, repeating_periods[i])
-                if moon["x"] == initial_state[i]["x"] && moon["vx"] == initial_state[i]["vx"] && repeating_periods[i][1] == 0
-                    repeating_periods[i][1] = step
-                    println("x repeat for planet $i at step $step")
-                end
-                if moon["y"] == initial_state[i]["y"] && moon["vy"] == initial_state[i]["vy"] && repeating_periods[i][2] == 0
-                    repeating_periods[i][2] = step
-                    println("y repeat for planet $i at step $step")
-                end
-                if moon["z"] == initial_state[i]["z"] && moon["vz"] == initial_state[i]["vz"] && repeating_periods[i][3] == 0
-                    repeating_periods[i][3] = step
-                    println("z repeat for planet $i at step $step")
-                end
-            end
-        end
-        return repeating_periods
-    end
-
-
-
+    repeating = [0,0,0]
     while true
-        for moonpair in combinations(1:length(input), 2)
-            input = gravity_pair(moonpair[1], moonpair[2]) 
-        end
-        input = add_velocity(input)
+        v = gravity_pair(input, v)
+        input = add_velocity(input, v)
         step += 1
         if step == steps
-            total_energy = energy(input)
+            total_energy = energy(input, v)
         end
-        repeating_periods = repeating_check(input)
-        if all([all(x -> x != 0, y) for y in repeating_periods])
-            return total_energy, lcm(vcat(repeating_periods...))
+        repeating = repeating_check(input, initial_state, repeating, step, v)
+        if all(repeating .!= 0)
+            return total_energy, lcm(repeating...)
         end
     end 
 end
-@show part_1(input, 1000)
+@show solve()
 
-function part_2(input)
-    nothing
-end
-@info part_2(input)

@@ -26,7 +26,7 @@ input = clean_input(file_path)
 
 function solve(input, nrow, ncol)
     screen = zeros(Bool, nrow, ncol)
-    function rect(screen, x, y)
+    function rect(screen, x, y) # turns on all of the pixels in a rectangle in the top-left of the screen which is x wide and y tall.
         for y_i in 1:y
             for x_i in 1:x
                 screen[x_i, y_i] = true
@@ -35,21 +35,21 @@ function solve(input, nrow, ncol)
         return screen
     end
 
-    function rotate_col(screen, rotated_row, rotated_amount)
+    function rotate_col(screen, rotated_row, rotated_amount) # shifts all of the pixels in column x (A) down by y (B) pixels. Pixels that would fall off the bottom appear at the top of the column.
         row = screen[rotated_row+1, :]
         row = circshift(row, rotated_amount)
         screen[rotated_row+1, :] = row
         return screen
     end
 
-    function rotate_row(screen, rotated_col, rotated_amount)
+    function rotate_row(screen, rotated_col, rotated_amount) # shifts all of the pixels in row y (A) right by x (B) pixels. Pixels that would fall off the right appear at the left of the row.
         col = screen[:, rotated_col+1]
         col = circshift(col, rotated_amount)
         screen[:, rotated_col+1] = col
         return screen
     end
     
-    for (command, args...) in input
+    for (command, args...) in input # for each command, run the corresponding function
         if command == "rect"
             screen = rect(screen, args[1], args[2])
         elseif command == "rotate"
@@ -67,12 +67,13 @@ end
 emoji_replace(x) = x ? "⬛️" : "⬜️"
 
 function print_screen(screen)
-    for row in 1:size(screen, 1)
-        for col in 1:size(screen, 2)
+    for row in axes(screen, 1)
+        for col in axes(screen, 2)
             print(emoji_replace(screen[row, col]))
         end
         println()
     end
+    #"AFBUPZBJPS", at least for me
 end
 
 p1, p2 = solve(input, 50, 6)

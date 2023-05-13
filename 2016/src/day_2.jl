@@ -6,8 +6,8 @@ using DelimitedFiles
 file_path = "2016/data/day_2.txt"
 input = readdlm(file_path, String)
 
-function part_1(input) # solves part 1
-    current_position = 5 # start at 5
+function part_1(input)
+    current_position = 5 
     bathroom_code = ""
     for line in input
         for char in line
@@ -26,11 +26,11 @@ function part_1(input) # solves part 1
     return bathroom_code # return the code
 end
 
-function part_2(input) # solves part 2
-    current_position = 5 # start at 5
+function part_2(input)
+    current_position = 5 # start at 5 again
     bathroom_code = ""
     for line in input
-        for char in line
+        for char in line # this part is a bit of a mess to read because, well, it's the rules are a mess, and I can't really do anything about that sorry!! 
             if char == 'U' # if it asks to move up
                 if current_position == 3 
                     current_position -= 2

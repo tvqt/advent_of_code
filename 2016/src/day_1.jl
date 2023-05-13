@@ -4,23 +4,7 @@
 file_path = "2016/data/day_1.txt"
 input = split(read(file_path, String), ", ")
 
-function new_direction(my_dir::Int, turn::Char) # returns a new direction
-    if turn == 'R'
-        my_dir += 90
-    elseif turn == 'L'
-        my_dir -= 90
-    end
-    return (360+ my_dir) % 360
-end
-
-function new_direction(my_dir::Int, turn::Char) # returns a new direction
-    if turn == 'R'
-        my_dir += 90
-    elseif turn == 'L'
-        my_dir -= 90
-    end
-    return (360+ my_dir) % 360
-end
+new_direction(my_dir::Int, turn::Char) = turn == 'R' ? (360+ my_dir+ 90) % 360 : (360+ my_dir-90) % 360 
 
 function move(my_pos::CartesianIndex, my_dir::Int, steps::Int) # returns a new position
     if my_dir == 0
@@ -67,6 +51,5 @@ function solve(input=input) # solves both parts
     end
     return abs(position[1]) + abs(position[2]), abs(visited_twice[1]) + abs(visited_twice[2]) # get the manhattan distance of the final position and the first position visited twice
 end
-
 
 @show solve()

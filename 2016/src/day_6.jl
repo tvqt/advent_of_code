@@ -1,5 +1,6 @@
 # Day 6: Signals and Noise
 # https://adventofcode.com/2016/day/6
+# fairly self explanatory, so I won't be commenting this one.
 using StatsBase
 
 file_path = "2016/data/day_6.txt"

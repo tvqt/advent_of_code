@@ -1,6 +1,8 @@
 # Day 7: Internet Protocol Version 7
 # https://adventofcode.com/2016/day/7
 
+# this one is a bunch of string parsing. not the funnest thing in the world, but good to keep on top of. Enjoy!
+
 input = readlines("2016/data/day_7.txt")
 
 function line_checker(line, part::Int=1)
